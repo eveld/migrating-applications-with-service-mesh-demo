@@ -42,7 +42,7 @@ expose-gateway:
 	yard expose --name cloud --bind-ip none \
 	--network $(PROJECT)_wan \
 	--network-ip 192.169.7.40 \
-	--service-name pod/mesh-gateway-ddfcc677f-4bqdw \
+	--service-name svc/mesh-gateway \
 	--port 443:443
 
 nuke: destroy-cloud destroy-apps destroy-currency destroy-onprem

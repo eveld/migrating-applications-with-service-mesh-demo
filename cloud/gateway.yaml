@@ -1,0 +1,57 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mesh-gateway
+  labels:
+    app: mesh-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mesh-gateway
+  template:
+    metadata:
+      labels:
+        app: mesh-gateway
+      annotations:
+        "consul.hashicorp.com/connect-inject": "false"
+    spec:
+      containers:
+      - name: mesh-gateway
+        image: nicholasjackson/consul-envoy:v1.6.1-v0.10.0
+        ports:
+        - containerPort: 443
+        command: [
+          "consul",
+          "connect", "envoy",
+          "-mesh-gateway",
+          "-register",
+          "-http-addr",
+          "$(HOST_IP):8500",
+          "-grpc-addr",
+          "$(HOST_IP):8502",
+          "-wan-address", "192.169.7.40:443",
+          "--",
+          "-l", "debug"]
+        env:
+        - name: HOST_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mesh-gateway
+spec:
+  selector:
+    app: mesh-gateway
+  ports:
+    - protocol: TCP
+      port: 443
+      targetPort: 443

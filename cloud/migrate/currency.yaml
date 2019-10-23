@@ -16,7 +16,6 @@ spec:
         app: currency
       annotations:
         "consul.hashicorp.com/connect-inject": "true"
-        "consul.hashicorp.com/connect-service-upstreams": "payments:9091"
         "consul.hashicorp.com/service-meta-version": "2"
         "consul.hashicorp.com/service-tags": "v2"
     spec:
@@ -32,5 +31,3 @@ spec:
           value: "currency (cloud)"
         - name: "MESSAGE"
           value: "currency response"
-        - name: "UPSTREAM_URIS"
-          value: "http://localhost:9091"
