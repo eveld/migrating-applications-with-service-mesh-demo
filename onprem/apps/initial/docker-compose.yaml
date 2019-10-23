@@ -76,7 +76,7 @@ services:
 networks:
   wan:
     external:
-      name: demo_wan
+      name: yard_wan
   onprem:
     external:
-      name: demo_onprem
+      name: yard_onprem

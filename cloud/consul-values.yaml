@@ -1,17 +1,17 @@
 global:
   datacenter: cloud
 
-# meshGateway:
-#   enabled: true
-#   mode: local
-#   replicas: 1
-#   wanAddress:
-#     useNodeIP: false
-#     host: "192.169.7.40"
-#   service:
-#     enabled: true
-#     type: ClusterIP
-#     port: 443
+meshGateway:
+  enabled: true
+  mode: local
+  replicas: 1
+  wanAddress:
+    useNodeIP: false
+    host: "192.169.7.40"
+  service:
+    enabled: true
+    type: ClusterIP
+    port: 443
 
 server:
   extraConfig: |

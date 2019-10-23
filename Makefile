@@ -1,6 +1,6 @@
-.PHONY: onprem cloud expose nuke tools apps
+.PHONY: onprem cloud expose nuke tools apps migrate world
 
-PROJECT=demo
+PROJECT=yard
 
 CLOUD_PATH="$(PWD)/cloud"
 ONPREM_PATH="$(PWD)/onprem"
@@ -42,7 +42,7 @@ expose-gateway:
 	yard expose --name cloud --bind-ip none \
 	--network $(PROJECT)_wan \
 	--network-ip 192.169.7.40 \
-	--service-name svc/mesh-gateway \
+	--service-name svc/consul-consul-mesh-gateway \
 	--port 443:443
 
 nuke: destroy-cloud destroy-apps destroy-currency destroy-onprem
@@ -63,3 +63,19 @@ destroy-currency:
 	docker-compose -p $(PROJECT) --project-directory $(CURRENCY_PATH) -f $(CURRENCY_PATH)/docker-compose.yaml down -v
 
 migrate: destroy-currency
+	docker run \
+	--rm -it \
+	-v $(HOME)/.shipyard/cloud/:/files \
+	-v $(PWD):/work \
+	-w /work \
+	-e "KUBECONFIG=/files/kubeconfig-docker.yml" \
+	--network k3d-cloud \
+	nicholasjackson/consul-k8s-tools kubectl apply -f /work/cloud/migrate/currency.yaml
+	docker run \
+	--rm -it \
+	-v $(HOME)/.shipyard/cloud:/files \
+	-v $(PWD):/work \
+	-w /work \
+	-e "CONSUL_HTTP_ADDR=http://k3d-cloud-server:30443" \
+	--network k3d-cloud \
+	nicholasjackson/consul-k8s-tools consul config write /work/cloud/migrate/redirect.hcl
