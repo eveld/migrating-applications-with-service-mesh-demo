@@ -1,0 +1,36 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: currency
+  labels:
+    app: currency
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: currency
+  template:
+    metadata:
+      labels:
+        app: currency
+      annotations:
+        "consul.hashicorp.com/connect-inject": "true"
+        "consul.hashicorp.com/connect-service-upstreams": "payments:9091"
+        "consul.hashicorp.com/service-meta-version": "2"
+        "consul.hashicorp.com/service-tags": "v2"
+    spec:
+      containers:
+      - name: currency
+        image: nicholasjackson/fake-service:v0.7.3
+        ports:
+        - containerPort: 9090
+        env:
+        - name: "LISTEN_ADDR"
+          value: "0.0.0.0:9090"
+        - name: "NAME"
+          value: "currency (cloud)"
+        - name: "MESSAGE"
+          value: "currency response"
+        - name: "UPSTREAM_URIS"
+          value: "http://localhost:9091"
