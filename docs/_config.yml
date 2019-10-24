@@ -1,6 +1,6 @@
 ---
 theme: just-the-docs
-remote_theme: https://github.com/pmarsceill/just-the-docs
+remote_theme: pmarsceill/just-the-docs@v0.2.7
 color_scheme: "dark"
 heading_anchors: true
 
