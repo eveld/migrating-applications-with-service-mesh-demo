@@ -19,27 +19,6 @@ services:
       wan:
         ipv4_address: 192.169.7.2
 
-  # Mesh gateway on VM
-  gateway:
-    image: nicholasjackson/consul-envoy:v1.6.1-v0.10.0
-    environment:
-      CONSUL_HTTP_ADDR: 10.5.0.2:8500
-      CONSUL_GRPC_ADDR: 10.5.0.2:8502
-    command: [
-      "consul",
-      "connect", "envoy",
-      "-mesh-gateway",
-      "-register",
-      "-address", "10.5.0.3:8443",
-      "-wan-address", "192.169.7.3:8443",
-      "--",
-      "-l", "debug"]
-    networks:
-      onprem:
-        ipv4_address: 10.5.0.3
-      wan:
-        ipv4_address: 192.169.7.3
-
 networks:
   onprem:
     driver: bridge

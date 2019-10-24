@@ -1,5 +1,5 @@
 Kind = "service-defaults"
-Name = "auth"
+Name = "payments"
 
 Protocol = "http"
 

@@ -1,7 +1,7 @@
 service {
   name = "currency"
-  id = "currency"
-  address = "10.5.0.12"
+  id = "currency-v1"
+  address = "10.5.0.30"
   port = 9090
   
   tags      = ["v1"]
@@ -15,7 +15,7 @@ service {
       
       check {
         name = "Connect Envoy Sidecar"
-        tcp = "10.5.0.12:20000"
+        tcp = "10.5.0.30:20000"
         interval ="10s"
       }
     }  

@@ -1,12 +1,12 @@
 service {
   name = "payments"
-  id = "payments"
-  address = "10.5.0.11"
+  id = "payments-v2"
+  address = "10.5.0.21"
   port = 9090
   
-  tags      = ["v1"]
+  tags      = ["v2"]
   meta      = {
-    version = "1"
+    version = "2"
   }
   
   connect { 
@@ -15,7 +15,7 @@ service {
       
       check {
         name = "Connect Envoy Sidecar"
-        tcp = "10.5.0.11:20000"
+        tcp = "10.5.0.21:20000"
         interval ="10s"
       }
       

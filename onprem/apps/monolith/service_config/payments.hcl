@@ -1,11 +1,11 @@
 service {
-  name = "auth"
-  id = "auth"
-  address = "10.5.0.13"
+  name = "payments"
+  id = "payments-v1"
+  address = "10.5.0.20"
   port = 9090
   
-  tags      = ["v1"]
-  meta      = {
+  tags = ["v1"]
+  meta = {
     version = "1"
   }
   
@@ -15,9 +15,11 @@ service {
       
       check {
         name = "Connect Envoy Sidecar"
-        tcp = "10.5.0.13:20000"
+        tcp = "10.5.0.20:20000"
         interval ="10s"
       }
+      
+      proxy {}
     }  
   }
 }

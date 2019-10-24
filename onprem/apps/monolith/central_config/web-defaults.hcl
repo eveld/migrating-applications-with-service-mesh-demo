@@ -1,5 +1,5 @@
 Kind = "service-defaults"
-Name = "api"
+Name = "web"
 
 Protocol = "http"
 
