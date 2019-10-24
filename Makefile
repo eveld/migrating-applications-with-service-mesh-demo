@@ -76,6 +76,10 @@ destroy-payments-v2:
 	docker-compose -p $(PROJECT) --project-directory $(PAYMENTS_PATH) -f $(PAYMENTS_PATH)/docker-compose.yaml down -v
 	yard exec --name cloud -- consul config delete -kind service-resolver -name payments
 
+
+#
+# Route test group to v2
+#
 payments-v2-router:
 	yard exec --name cloud -- consul config write /work/onprem/apps/payments-v2/central_config/payments-router.hcl
 destroy-payments-v2-router:
@@ -93,6 +97,7 @@ payments-v2-splitter-100:
 	yard exec --name cloud -- consul config write /work/onprem/apps/payments-v2/central_config/payments-splitter-100.hcl
 destroy-payments-v2-splitter:
 	yard exec --name cloud -- consul config delete -kind service-splitter -name payments
+
 
 #
 # Expose on-prem gateway
@@ -192,6 +197,7 @@ deploy-multi-cloud-service:
 	yard exec --name multi-cloud -- kubectl apply -f /work/multi-cloud/b.yaml
 	yard exec --name cloud -- consul config write /work/multi-cloud/space-resolver.hcl
 	yard exec --name cloud -- consul config write /work/multi-cloud/onprem-resolver.hcl
+
 
 #
 # Expose the multi-cloud service on localhost
