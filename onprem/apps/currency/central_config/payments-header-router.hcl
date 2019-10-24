@@ -17,16 +17,5 @@ routes = [
     destination {
       service = "currency"
     }
-  },
-  {
-    match {
-      http {
-        path_prefix = "/"
-      }
-    }
-
-    destination {
-      service = "payments"
-    }
   }
 ]

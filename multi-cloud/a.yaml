@@ -1,0 +1,46 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: a
+  labels:
+    app: a
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: a
+  template:
+    metadata:
+      labels:
+        app: a
+      annotations:
+        "consul.hashicorp.com/connect-inject": "true"
+        "consul.hashicorp.com/connect-service-upstreams": "b:9091"
+    spec:
+      containers:
+      - name: a
+        image: nicholasjackson/fake-service:v0.7.3
+        ports:
+        - containerPort: 9090
+        env:
+        - name: "LISTEN_ADDR"
+          value: "0.0.0.0:9090"
+        - name: "NAME"
+          value: "a (cloud)"
+        - name: "MESSAGE"
+          value: "a response"
+        - name: "UPSTREAM_URIS"
+          value: "http://localhost:9091"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: a
+spec:
+  selector:
+    app: a
+  ports:
+    - protocol: TCP
+      port: 9090
+      targetPort: 9090

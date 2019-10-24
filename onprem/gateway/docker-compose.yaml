@@ -11,15 +11,15 @@ services:
       "connect", "envoy",
       "-mesh-gateway",
       "-register",
-      "-address", "10.5.0.3:8443",
-      "-wan-address", "192.169.7.3:8443",
+      "-address", "10.5.0.33:8443",
+      "-wan-address", "192.169.7.33:8443",
       "--",
       "-l", "debug"]
     networks:
-      yard_onprem:
-        ipv4_address: 10.5.0.3
-      yard_wan:
-        ipv4_address: 192.169.7.3
+      onprem:
+        ipv4_address: 10.5.0.33
+      wan:
+        ipv4_address: 192.169.7.33
 
 networks:
   wan:

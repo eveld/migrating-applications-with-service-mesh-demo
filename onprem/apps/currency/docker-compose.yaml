@@ -16,7 +16,6 @@ services:
       CONSUL_HTTP_ADDR: 10.5.0.2:8500
       CONSUL_GRPC_ADDR: 10.5.0.2:8502
       SERVICE_CONFIG: /config/currency.hcl
-      CENTRAL_CONFIG: "/central_config/currency-defaults.hcl"
     volumes:
       - "./service_config:/config"
       - "./central_config:/central_config"
