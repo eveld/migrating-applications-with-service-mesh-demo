@@ -4,4 +4,12 @@ title: Home
 nav_order: 1 
 ---
 
-# Coming soon
+# Migrating applications with Service Mesh
+
+## Requirements
+This workshop runs 100% locally using Docker, the following tools are required to complete the workshop:
+
+* Docker (https://docs.docker.com/install//)
+* Shipyard (https://shipyard.demo.gs)
+
+
