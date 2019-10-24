@@ -16,7 +16,7 @@ PAYMENTS_PATH="$(APPS_PATH)/payments-v2"
 
 CLOUD_CURRENCY_PATH="$(CLOUD_PATH)/currency"
 
-world: onprem monolith currency currency-path-router payments-v2 payments-v2-router payments-v2-splitter-100 cloud
+world: onprem monolith currency currency-path-router payments-v2 payments-v2-router payments-v2-splitter-100 cloud expose-cloud currency-v2 onprem-gateway currency-v2-route multi-cloud expose-multi-cloud multi-cloud-service
 
 #
 # Base environment
@@ -100,34 +100,6 @@ destroy-payments-v2-splitter:
 
 
 #
-# Expose on-prem gateway
-#
-onprem-gateway:
-	docker-compose -p $(PROJECT) --project-directory $(GATEWAY_PATH) -f $(GATEWAY_PATH)/docker-compose.yaml up -d
-destroy-onprem-gateway:
-	docker-compose -p $(PROJECT) --project-directory $(GATEWAY_PATH) -f $(GATEWAY_PATH)/docker-compose.yaml down -v
-
-
-migrate: destroy-currency
-	docker run \
-	--rm -it \
-	-v $(HOME)/.shipyard/cloud/:/files \
-	-v $(PWD):/work \
-	-w /work \
-	-e "KUBECONFIG=/files/kubeconfig-docker.yml" \
-	--network k3d-cloud \
-	nicholasjackson/consul-k8s-tools kubectl apply -f /work/cloud/migrate/currency.yaml
-	docker run \
-	--rm -it \
-	-v $(HOME)/.shipyard/cloud:/files \
-	-v $(PWD):/work \
-	-w /work \
-	-e "CONSUL_HTTP_ADDR=http://k3d-cloud-server:30443" \
-	--network k3d-cloud \
-	nicholasjackson/consul-k8s-tools consul config write /work/cloud/migrate/redirect.hcl
-
-
-#
 # Create a kubernetes cluster
 #
 cloud:
@@ -139,7 +111,7 @@ destroy-cloud:
 #
 # Expose consul and mesh-gateway on wan
 #
-expose-cloud: expose-consul expose-gateway
+expose-cloud: expose-cloud-consul expose-cloud-gateway
 expose-cloud-consul:
 	yard expose --name cloud --bind-ip none \
 	--network $(PROJECT)_wan \
@@ -159,6 +131,35 @@ expose-cloud-gateway:
 
 
 #
+# Deploy an updated version of currency in the cloud
+#
+currency-v2:
+	yard exec --name cloud -- kubectl apply -f /work/cloud/currency/currency.yaml
+	
+destroy-currency-v2:
+	yard exec --name cloud -- kubectl delete -f /work/cloud/currency/currency.yaml
+	yard exec --name cloud -- consul config delete -kind service-resolver -name currency
+
+
+#
+# Expose on-prem gateway
+#
+onprem-gateway:
+	docker-compose -p $(PROJECT) --project-directory $(GATEWAY_PATH) -f $(GATEWAY_PATH)/docker-compose.yaml up -d
+destroy-onprem-gateway:
+	docker-compose -p $(PROJECT) --project-directory $(GATEWAY_PATH) -f $(GATEWAY_PATH)/docker-compose.yaml down -v
+
+
+#
+# Route traffic to the updated version of currency in the cloud
+#
+currency-v2-route:
+	yard exec --name cloud -- consul config write /work/cloud/currency/currency-resolver.hcl
+destroy-currency-v2-route:
+	yard exec --name cloud -- consul config delete -kind service-resolver -name currency
+
+
+#
 # Create another kubernetes cluster
 #
 multi-cloud:
@@ -170,7 +171,7 @@ destroy-multi-cloud:
 #
 # Expose consul and mesh-gateway on wan
 #
-expose-multi-cloud: expose-multi-consul expose-multi-gateway
+expose-multi-cloud: expose-multi-cloud-consul expose-multi-cloud-gateway
 expose-multi-cloud-consul:
 	yard expose --name multi-cloud --bind-ip none \
 	--network $(PROJECT)_wan \
@@ -192,19 +193,15 @@ expose-multi-cloud-gateway:
 #
 # Create the cloud cluster with kubernetes
 #
+multi-cloud-service: deploy-multi-cloud-service expose-multi-cloud-service
 deploy-multi-cloud-service:
 	yard exec --name cloud -- kubectl apply -f /work/multi-cloud/a.yaml
-	yard exec --name multi-cloud -- kubectl apply -f /work/multi-cloud/b.yaml
 	yard exec --name cloud -- consul config write /work/multi-cloud/space-resolver.hcl
-	yard exec --name cloud -- consul config write /work/multi-cloud/onprem-resolver.hcl
-
-
-#
-# Expose the multi-cloud service on localhost
-#
+	yard exec --name multi-cloud -- kubectl apply -f /work/multi-cloud/b.yaml
+	yard exec --name multi-cloud -- consul config write /work/multi-cloud/onprem-resolver.hcl
 expose-multi-cloud-service:
 	yard expose --name cloud \
-	--service-name svc/a \
+	--service-name svc/service-a \
 	--port 19090:9090
 
 
