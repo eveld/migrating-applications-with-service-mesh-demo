@@ -1,7 +1,7 @@
 kind = "service-resolver"
-name = "service-b"
+name = "backend"
 
 redirect {
-  service = "service-b"
+  service = "backend"
   datacenter = "space"
 }

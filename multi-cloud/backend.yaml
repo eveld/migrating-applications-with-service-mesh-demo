@@ -2,24 +2,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: service-b
+  name: backend
   labels:
-    app: service-b
+    app: backend
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: service-b
+      app: backend
   template:
     metadata:
       labels:
-        app: service-b
+        app: backend
       annotations:
         "consul.hashicorp.com/connect-inject": "true"
-        "consul.hashicorp.com/connect-service-upstreams": "payments:9091"
     spec:
       containers:
-      - name: service-b
+      - name: backend
         image: nicholasjackson/fake-service:v0.7.3
         ports:
         - containerPort: 9090
@@ -27,8 +26,6 @@ spec:
         - name: "LISTEN_ADDR"
           value: "0.0.0.0:9090"
         - name: "NAME"
-          value: "service-b (space)"
+          value: "backend (space)"
         - name: "MESSAGE"
-          value: "service-b response"
-        - name: "UPSTREAM_URIS"
-          value: "http://localhost:9091"
+          value: "backend response"

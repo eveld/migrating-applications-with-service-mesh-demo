@@ -191,18 +191,29 @@ expose-multi-cloud-gateway:
 
 
 #
-# Create the cloud cluster with kubernetes
+# Deploy multi-cluster services
 #
 multi-cloud-service: deploy-multi-cloud-service expose-multi-cloud-service
 deploy-multi-cloud-service:
-	yard exec --name cloud -- kubectl apply -f /work/multi-cloud/a.yaml
+	yard exec --name cloud -- kubectl apply -f /work/multi-cloud/api.yaml
 	yard exec --name cloud -- consul config write /work/multi-cloud/space-resolver.hcl
-	yard exec --name multi-cloud -- kubectl apply -f /work/multi-cloud/b.yaml
-	yard exec --name multi-cloud -- consul config write /work/multi-cloud/onprem-resolver.hcl
+	yard exec --name multi-cloud -- kubectl apply -f /work/multi-cloud/backend.yaml
+destroy-multi-cloud-service:
+	yard exec --name cloud -- consul config delete -kind service-resolver -name backend
+	yard exec --name cloud -- kubectl delete -f /work/multi-cloud/api.yaml
+	yard exec --name multi-cloud -- kubectl delete -f /work/multi-cloud/backend.yaml
 expose-multi-cloud-service:
 	yard expose --name cloud \
-	--service-name svc/service-a \
+	--service-name svc/api \
 	--port 19090:9090
+
+
+#
+# Connect the multi-cluster services to onprem
+#
+connect-onprem:
+	yard exec --name multi-cloud -- kubectl apply -f /work/connect/backend.yaml
+	yard exec --name multi-cloud -- consul config write /work/connect/onprem-resolver.hcl
 
 
 #
