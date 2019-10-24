@@ -14,6 +14,8 @@ curl http://localhost:9090
 open http://localhost:9090/ui
 ```
 
+![Monolith](docs/images/step1.png)
+
 ### Components
 
 - web: upstream of payments
@@ -44,6 +46,8 @@ curl http://localhost:9090
 curl http://localhost:9090/currency
 ```
 
+![Monolith](docs/images/step2.png)
+
 ### Components
 
 - web: upstream of payments, and route dev group to currency
@@ -69,6 +73,8 @@ curl http://localhost:9090
 curl -H "group: test" http://localhost:9090
 ```
 
+![Monolith](docs/images/step3.png)
+
 ### Components
 
 - web: upstream of payments, and route test group to payments-v2
@@ -89,8 +95,12 @@ make payments-v2-splitter-50
 make payments-v2-splitter-100
 ```
 
+![Monolith](docs/images/step4.png)
+
 ## Step 5 - Multi-cluster
 
 ```shell
 make cloud
 ```
+
+![Monolith](docs/images/step5.png)
