@@ -1,0 +1,32 @@
+version: '3'
+services:
+  # Payments service
+  payments-v2:
+    image: nicholasjackson/fake-service:v0.7.3
+    environment:
+      UPSTREAM_URIS: http://localhost:9091
+      LISTEN_ADDR: localhost:9090
+      NAME: "payments v2 (onprem)"
+      MESSAGE: "payments response"
+    networks:
+      onprem:
+        ipv4_address: 10.5.0.21
+  payments_proxy-v2:
+    image: nicholasjackson/consul-envoy:v1.6.1-v0.10.0
+    environment:
+      CONSUL_HTTP_ADDR: 10.5.0.2:8500
+      CONSUL_GRPC_ADDR: 10.5.0.2:8502
+      SERVICE_CONFIG: /config/payments.hcl
+    volumes:
+      - "./service_config:/config"
+      - "./central_config:/central_config"
+    command: ["consul", "connect", "envoy","-sidecar-for", "payments-v2"]
+    network_mode: "service:payments-v2"
+
+networks:
+  wan:
+    external:
+      name: yard_wan
+  onprem:
+    external:
+      name: yard_onprem
