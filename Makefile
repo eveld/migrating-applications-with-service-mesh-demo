@@ -153,9 +153,9 @@ destroy-onprem-gateway:
 #
 # Route traffic to the updated version of currency in the cloud
 #
-currency-v2-route:
+currency-v2-router:
 	yard exec --name cloud -- consul config write /work/cloud/currency/currency-resolver.hcl
-destroy-currency-v2-route:
+destroy-currency-v2-router:
 	yard exec --name cloud -- consul config delete -kind service-resolver -name currency
 
 

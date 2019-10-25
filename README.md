@@ -97,10 +97,43 @@ make payments-v2-splitter-100
 
 ![Monolith](docs/images/step4.png)
 
-## Step 5 - Multi-cluster
+## Step 5 - Migrate to Kubernetes
 
 ```shell
+# Create the "cloud" environment running Kubernetes
 make cloud
+
+# Expose consul and the mesh gateway on the "WAN" network
+make expose-cloud
+
+# Deploy the new version of the currency service
+make currency-v2
+
+# Deploy the mesh gateway in the datacenter, to connect the environments
+make onprem-gateway
+
+# Route traffic to /currency over the mesh gateway to v2 of the currency service
+make currency-v2-router
 ```
 
 ![Monolith](docs/images/step5.png)
+
+## Step 6 - Multi-Cluster
+
+```shell
+# Create a second "cloud" environment running Kubernetes
+make multi-cloud
+
+# Expose consul and the mesh gateway on the "WAN" network
+make expose-multi-cloud
+
+# Deploy a new service that spans multiple clusters
+make deploy-multi-cloud-service
+```
+
+## Step 7 - Multi-Cloud
+
+```shell
+# Connect the 2 new environments up to the first on prem environment
+make connect-onprem
+```

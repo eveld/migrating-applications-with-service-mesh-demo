@@ -31,3 +31,5 @@ spec:
           value: "currency (cloud)"
         - name: "MESSAGE"
           value: "currency response"
+        - name: "HTTP_CLIENT_KEEP_ALIVES"
+          value: "false"

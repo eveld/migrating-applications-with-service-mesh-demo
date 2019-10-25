@@ -32,3 +32,5 @@ spec:
           value: "backend response"
         - name: "UPSTREAM_URIS"
           value: "http://localhost:9091"
+        - name: "HTTP_CLIENT_KEEP_ALIVES"
+          value: "false"

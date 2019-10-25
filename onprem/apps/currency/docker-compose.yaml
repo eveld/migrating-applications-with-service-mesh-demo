@@ -7,6 +7,7 @@ services:
       LISTEN_ADDR: localhost:9090
       NAME: "currency (onprem)"
       MESSAGE: "currency response"
+      HTTP_CLIENT_KEEP_ALIVES: "false"
     networks:
       onprem:
         ipv4_address: 10.5.0.30

@@ -29,3 +29,5 @@ spec:
           value: "backend (space)"
         - name: "MESSAGE"
           value: "backend response"
+        - name: "HTTP_CLIENT_KEEP_ALIVES"
+          value: "false"
