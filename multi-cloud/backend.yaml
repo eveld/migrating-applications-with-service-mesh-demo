@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: nicholasjackson/fake-service:v0.7.3
+        image: nicholasjackson/fake-service:v0.7.7
         ports:
         - containerPort: 9090
         env:

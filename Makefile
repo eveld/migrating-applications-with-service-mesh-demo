@@ -16,7 +16,7 @@ PAYMENTS_PATH="$(APPS_PATH)/payments-v2"
 
 CLOUD_CURRENCY_PATH="$(CLOUD_PATH)/currency"
 
-world: onprem monolith currency currency-path-router payments-v2 payments-v2-router payments-v2-splitter-100 cloud expose-cloud currency-v2 onprem-gateway currency-v2-route multi-cloud expose-multi-cloud multi-cloud-service
+world: onprem monolith currency currency-path-router payments-v2 payments-v2-router payments-v2-splitter-100 cloud expose-cloud currency-v2 onprem-gateway currency-v2-router multi-cloud expose-multi-cloud multi-cloud-service
 
 #
 # Base environment
