@@ -1,6 +1,9 @@
 service {
-  name    = "api"
-  id      = "api-v1"
-  address = "10.5.0.4" # Normally automatically set by agent
-  port    = 9091
+  name = "api"
+  id   = "api-v1"
+  port = 9090
+
+  connect {
+    sidecar_service {}
+  }
 }

@@ -14,32 +14,39 @@ services:
         ipv4_address: 10.5.0.2
 
   web:
-    image: nicholasjackson/fake-service:vm-v0.7.6
+    image: nicholasjackson/fake-service:vm-v0.7.7
     environment:
-      CONSUL_GRPC_ADDR: localhost:8502
       LISTEN_ADDR: 0.0.0.0:9090
-      UPSTREAM_URIS: http://api:9090
+      UPSTREAM_URIS: http://localhost:9091
       NAME: Web
       MESSAGE: "Hello World"
       HTTP_CLIENT_KEEP_ALIVES: "false"
       CONSUL_SERVER: 10.5.0.2
       SERVICE_ID: web-v1
+    
+    volumes:
+      - "./server_config/web.hcl:/config/web.hcl"
 
     networks:
       vpcbr:
         ipv4_address: 10.5.0.3
     ports:
       - 9090:9090
-  
+
   api:
-    image: nicholasjackson/fake-service:vm-v0.7.6
+    image: nicholasjackson/fake-service:vm-v0.7.7
     environment:
-      LISTEN_ADDR: 0.0.0.0:9090
+      LISTEN_ADDR: localhost:9090
       NAME: API
       MESSAGE: "Hello World"
       HTTP_CLIENT_KEEP_ALIVES: "false"
-      CONSUL_SERVER: 10.5.0.2
+      CONSUL_SERVER: 10.5.0.2      
+      CONSUL_GRPC_ADDR: localhost:8502
+
       SERVICE_ID: api-v1
+    
+    volumes:
+      - "./server_config/api.hcl:/config/api.hcl"
 
     networks:
       vpcbr:

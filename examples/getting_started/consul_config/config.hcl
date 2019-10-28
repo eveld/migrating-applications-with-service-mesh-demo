@@ -13,3 +13,24 @@ client_addr = "0.0.0.0"
 
 advertise_addr                = "10.5.0.2"
 enable_central_service_config = true
+
+ports {
+  grpc = 8502
+}
+
+connect {
+  enabled = true
+}
+
+config_entries {
+  bootstrap = [
+    {
+      kind = "proxy-defaults"
+      name = "global"
+      
+      config {
+        protocol = "http"
+      }
+    }
+  ]
+}
