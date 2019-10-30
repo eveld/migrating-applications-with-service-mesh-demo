@@ -187,4 +187,6 @@ and reload the Web service at `http://localhost:9090/ui`. You should still see t
 ![](images/getting_started/fake_service_final.png)
 
 ## Summary
-In this section you have learned how to configure two existing services inside of a service mesh. The next section will look at how we can enable Consul Service Mesh for your new Greenfield service in Kubernetes
+In this section you have learned how to configure two existing services inside of a service mesh. The next section will look at how we can enable Consul Service Mesh for your new Greenfield service in Kubernetes.
+
+[Next](kubernetes.html)
