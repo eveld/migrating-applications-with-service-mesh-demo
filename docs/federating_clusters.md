@@ -141,7 +141,7 @@ When finished use "yard down" to cleanup and remove resources
 
 ```
 yard expose --bind-ip none \
-        --network gateways_wan \
+        --network federation_wan \
         --network-ip 192.169.7.130 \
         --service-name svc/consul-consul-server \
         --port 8302:8302 \
