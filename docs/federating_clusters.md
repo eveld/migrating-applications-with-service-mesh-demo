@@ -103,7 +103,7 @@ We can achieve this with the following command. Note the two flags `consul-port`
 yard up --consul-port 18500 \
         --consul-values $PWD/helm-values.yml \
         --network federation_wan \
-        --network-ip 192.169.7.130
+        --network-ip 192.169.7.131
 ```
 
 Run this command in your terminal now:
@@ -112,7 +112,7 @@ Run this command in your terminal now:
 ➜ yard up --consul-port 18500 \
         --consul-values $PWD/helm-values.yml \
         --network federation_wan \
-        --network-ip 192.169.7.130
+        --network-ip 192.169.7.131
 
      _______. __    __   __  .______   ____    ____  ___      .______       _______  
     /       ||  |  |  | |  | |   _  \  \   \  /   / /   \     |   _  \     |       \ 
@@ -135,6 +135,18 @@ To expose Kubernetes pods or services use the 'yard expose' command. e.g.
 yard expose svc/myservice 8080 8080
 
 When finished use "yard down" to cleanup and remove resources
+```
+
+## NOTE NEED SECTION ON EXPOSING GOSSIP TO VMS
+
+```
+yard expose --bind-ip none \
+        --network gateways_wan \
+        --network-ip 192.169.7.130 \
+        --service-name svc/consul-consul-server \
+        --port 8302:8302 \
+        --port 8301:8301 \
+        --port 8300:8300
 ```
 
 Once that is up and running you can test that the two datacenters have been federated by using the `consul members -wan` command. You will see that both of your clusters are now listed `onprem` and `cloud`.

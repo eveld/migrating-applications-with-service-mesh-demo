@@ -8,6 +8,11 @@ nav_order: 3
 
 In this exercise you will learn the basics of running an application using Consul Service Mesh in Kubernetes.  This example will use a local Kuberernetes cluster which has `Consul` pre-configured using the tool [Shipyard](https://shipyard.demo.gs).
 
+For more through walk through on how to run Consul on Kubernetes including setup and configuration of the Helm chart you can check out
+our Instruqt platform:
+
+https://instruqt.com/hashicorp/tracks/service-mesh-with-consul-k8s
+
 If you have not already installed `Shipyard`, you can do that now with the following command:
 
 ```
