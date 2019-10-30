@@ -18,15 +18,28 @@ CLOUD_CURRENCY_PATH="$(CLOUD_PATH)/currency"
 
 world: onprem monolith currency currency-path-router payments-v2 payments-v2-router payments-v2-splitter-100 cloud expose-cloud currency-v2 onprem-gateway currency-v2-router multi-cloud expose-multi-cloud multi-cloud-service
 
+step1: onprem monolith
+step2: currency currency-header-router
+step3: currency-path-router
+step4: payments-v2 payments-v2-router
+step5: payments-v2-splitter-50
+step6: payments-v2-splitter-100
+step7: cloud expose-cloud
+step8: currency-v2 currency-v2-router
+step9: onprem-gateway
+step10: multi-cloud expose-multi-cloud
+step11: multi-cloud-service
+step12: connect-onprem
+
 #
 # Base environment
 #
 onprem:
 	docker-compose -p $(PROJECT) --project-directory $(CLUSTER_PATH) -f $(CLUSTER_PATH)/docker-compose.yaml up -d
 	sleep 5
-	yard exec --name cloud -- consul config write /work/onprem/cluster/central_config/global-defaults.hcl
+	consul config write onprem/cluster/central_config/global-defaults.hcl
 destroy-onprem:
-	yard exec --name cloud -- consul config delete -kind service-defaults -name global
+	consul config delete -kind service-defaults -name global
 	docker-compose -p $(PROJECT) --project-directory $(CLUSTER_PATH) -f $(CLUSTER_PATH)/docker-compose.yaml down -v
 
 
@@ -52,18 +65,18 @@ destroy-currency:
 # Send test group users to currency when visiting /currency
 #
 currency-header-router:
-	yard exec --name cloud -- consul config write /work/onprem/apps/currency/central_config/payments-header-router.hcl
+	consul config write onprem/apps/currency/central_config/payments-header-router.hcl
 destroy-currency-header-router:
-	yard exec --name cloud -- consul config delete -kind service-router -name payments
+	consul config delete -kind service-router -name payments
 
 
 #
 # Send everyone to currency when visiting /currency
 #
 currency-path-router:
-	yard exec --name cloud -- consul config write /work/onprem/apps/currency/central_config/payments-path-router.hcl
+	consul config write onprem/apps/currency/central_config/payments-path-router.hcl
 destroy-currency-path-router:
-	yard exec --name cloud -- consul config delete -kind service-router -name payments
+	consul config delete -kind service-router -name payments
 
 
 #
@@ -71,39 +84,43 @@ destroy-currency-path-router:
 #
 payments-v2:
 	docker-compose -p $(PROJECT) --project-directory $(PAYMENTS_PATH) -f $(PAYMENTS_PATH)/docker-compose.yaml up -d
-	yard exec --name cloud -- consul config write /work/onprem/apps/payments-v2/central_config/payments-resolver.hcl
+	consul config write onprem/apps/payments-v2/central_config/payments-resolver.hcl
 destroy-payments-v2:
 	docker-compose -p $(PROJECT) --project-directory $(PAYMENTS_PATH) -f $(PAYMENTS_PATH)/docker-compose.yaml down -v
-	yard exec --name cloud -- consul config delete -kind service-resolver -name payments
+	consul config delete -kind service-resolver -name payments
 
 
 #
 # Route test group to v2
 #
 payments-v2-router:
-	yard exec --name cloud -- consul config write /work/onprem/apps/payments-v2/central_config/payments-router.hcl
+	consul config write onprem/apps/payments-v2/central_config/payments-router.hcl
 destroy-payments-v2-router:
-	yard exec --name cloud -- consul config delete -kind service-router -name payments
+	consul config delete -kind service-router -name payments
 
 
 #
 # Create traffic splitter between payments v1 and v2
 #
 payments-v2-splitter:
-	yard exec --name cloud -- consul config write /work/onprem/apps/payments-v2/central_config/payments-splitter.hcl
+	consul config write onprem/apps/payments-v2/central_config/payments-splitter.hcl
 payments-v2-splitter-50:
-	yard exec --name cloud -- consul config write /work/onprem/apps/payments-v2/central_config/payments-splitter-50.hcl
+	consul config write onprem/apps/payments-v2/central_config/payments-splitter-50.hcl
 payments-v2-splitter-100:
-	yard exec --name cloud -- consul config write /work/onprem/apps/payments-v2/central_config/payments-splitter-100.hcl
+	consul config write onprem/apps/payments-v2/central_config/payments-splitter-100.hcl
 destroy-payments-v2-splitter:
-	yard exec --name cloud -- consul config delete -kind service-splitter -name payments
+	consul config delete -kind service-splitter -name payments
 
 
 #
 # Create a kubernetes cluster
 #
 cloud:
-	yard up --type k3s --name cloud --consul-port 18500 --dashboard-port 18443 --network $(PROJECT)_wan --network-ip "192.169.7.100" --consul-values $(CLOUD_PATH)/consul-values.yaml
+	yard up --type k3s --name cloud --consul-port 18500 --dashboard-port 18443 --network $(PROJECT)_wan --network-ip "192.169.7.100" --consul-values $(CLOUD_PATH)/consul-values.yaml \
+	--push-image nicholasjackson/fake-service:v0.7.7 \
+	--push-image nicholasjackson/fake-service:vm-v0.7.7 \
+	--push-image envoyproxy/envoy:v1.10.0 \
+	--push-image kubernetesui/dashboard:v2.0.0-beta4
 destroy-cloud:
 	yard down --name cloud
 
@@ -138,7 +155,7 @@ currency-v2:
 	
 destroy-currency-v2:
 	yard exec --name cloud -- kubectl delete -f /work/cloud/currency/currency.yaml
-	yard exec --name cloud -- consul config delete -kind service-resolver -name currency
+	consul config delete -kind service-resolver -name currency
 
 
 #
@@ -154,16 +171,20 @@ destroy-onprem-gateway:
 # Route traffic to the updated version of currency in the cloud
 #
 currency-v2-router:
-	yard exec --name cloud -- consul config write /work/cloud/currency/currency-resolver.hcl
+	consul config write cloud/currency/currency-resolver.hcl
 destroy-currency-v2-router:
-	yard exec --name cloud -- consul config delete -kind service-resolver -name currency
+	consul config delete -kind service-resolver -name currency
 
 
 #
 # Create another kubernetes cluster
 #
 multi-cloud:
-	yard up --type k3s --name multi-cloud --consul-port 28500 --dashboard-port 28443 --network $(PROJECT)_wan --network-ip "192.169.7.200" --consul-values $(MULTICLOUD_PATH)/consul-values.yaml
+	yard up --type k3s --name multi-cloud --consul-port 28500 --dashboard-port 28443 --network $(PROJECT)_wan --network-ip "192.169.7.200" --consul-values $(MULTICLOUD_PATH)/consul-values.yaml \
+	--push-image nicholasjackson/fake-service:v0.7.7 \
+	--push-image nicholasjackson/fake-service:vm-v0.7.7 \
+	--push-image envoyproxy/envoy:v1.10.0 \
+	--push-image kubernetesui/dashboard:v2.0.0-beta4
 destroy-multi-cloud:
 	yard down --name multi-cloud
 
@@ -196,10 +217,11 @@ expose-multi-cloud-gateway:
 multi-cloud-service: deploy-multi-cloud-service expose-multi-cloud-service
 deploy-multi-cloud-service:
 	yard exec --name cloud -- kubectl apply -f /work/multi-cloud/api.yaml
-	yard exec --name cloud -- consul config write /work/multi-cloud/space-resolver.hcl
+	consul config write multi-cloud/space-resolver.hcl
 	yard exec --name multi-cloud -- kubectl apply -f /work/multi-cloud/backend.yaml
+	sleep 3
 destroy-multi-cloud-service:
-	yard exec --name cloud -- consul config delete -kind service-resolver -name backend
+	consul config delete -kind service-resolver -name backend
 	yard exec --name cloud -- kubectl delete -f /work/multi-cloud/api.yaml
 	yard exec --name multi-cloud -- kubectl delete -f /work/multi-cloud/backend.yaml
 expose-multi-cloud-service:
@@ -213,7 +235,7 @@ expose-multi-cloud-service:
 #
 connect-onprem:
 	yard exec --name multi-cloud -- kubectl apply -f /work/connect/backend.yaml
-	yard exec --name multi-cloud -- consul config write /work/connect/onprem-resolver.hcl
+	consul config write connect/onprem-resolver.hcl
 
 
 #
