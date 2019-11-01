@@ -93,22 +93,22 @@ server:
     }
 ```
 
-Let's create our Kubernetes cluster using `Shipyard`, this time we are going to need to connect our K8s cluster to the `wan` network which the `onprem` cluster is also connected to. We are also going to assign it the ip address `192.169.7.130` which we have defined as our advertise_addr_wan in our Consul configuration.
+Let's create our Kubernetes cluster using `Shipyard`, this time we are going to need to connect our K8s cluster to the `wan` network which the `onprem` cluster is also connected to. We are also going to assign it the ip address `192.169.7.100` so the machine is connected to the `wan` network.
 
 Shipyard will create the new k8s cluster in docker and then attach it to the `wan` network with the correct ip. Admittedly this is slightly simplified over the infrastructure wrangling you would have to do to set this up in a cloud provider. But the principle is the same, you have two networks, one for your internal datacenter traffic and one for datacenter to datacenter traffic.
 
 We can achieve this with the following command. Note the two flags `consul-port` and `consul-values`, these allow us to override the default port for accessing Consul (onprem has already claimed 8500), and a convenient way of getting Shipyard to override the helm-values when it installs Consul.
 
-```
+```shell
 yard up --consul-port 18500 \
         --consul-values $PWD/helm-values.yml \
         --network federation_wan \
-        --network-ip 192.169.7.130
+        --network-ip 192.169.7.100
 ```
 
 Run this command in your terminal now:
 
-```
+```shell
 ➜ yard up --consul-port 18500 \
         --consul-values $PWD/helm-values.yml \
         --network federation_wan \
@@ -137,9 +137,24 @@ yard expose svc/myservice 8080 8080
 When finished use "yard down" to cleanup and remove resources
 ```
 
+Now to make Consul reachable, we will also need start a port-forward on the ip `192.169.7.130`, which we have defined as our `advertise_addr_wan` in our Consul configuration.
+
+```shell
+yard expose \
+  --bind-ip none \
+  --network federation_wan \
+  --network-ip 192.169.7.130 \
+  --service-name svc/consul-consul-server \
+  --port 8600:8600 \
+  --port 8500:8500 \
+  --port 8302:8302 \
+  --port 8301:8301 \
+  --port 8300:8300
+```
+
 Once that is up and running you can test that the two datacenters have been federated by using the `consul members -wan` command. You will see that both of your clusters are now listed `onprem` and `cloud`.
 
-```
+```shell
 ➜ consul members -wan
 Node                          Address             Status  Type    Build  Protocol  DC      Segment
 1182f82647e4.onprem           192.169.7.2:8302    alive   server  1.6.1  2         onprem  <all>
