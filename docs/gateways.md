@@ -165,12 +165,69 @@ If you look at the Consul UI [http://localhost:18500/ui](http://localhost:18599/
 ![](images/gateways/consul_ui_k8s.png)
 
 ## Configuring service resolution
-Your clusters and applications are now all up and running, however; if you visit the `web` service [http://localhost:9090](http://localhost:9090]. You will see that there is still an upstream error.
+Your clusters and applications are now all up and running, however; if you visit the `web` service [http://localhost:9090/ui](http://localhost:9090/ui). You will see that there is still an upstream error.
 
 ![](images/gateways/fake_service_broken.png)
 
 Even though the two datacenters are federated and there are gateways linking the two systems, by default the service mesh will always resolve to the local datacenter. In our setup we do not have an `api` service running in the `onprem` datacenter so this is causing an error.
 
-We can resolve this by 
+We can resolve this by explicitly telling Consul to resolve the `API` service to the `cloud` datacenter with L7 config.
 
-**ADD CENTRAL CONFIG**
+A `service-resolver` allows you to configure features for service resolution such as `redirects`, `subsets` and much more. 
+
+[https://www.consul.io/docs/agent/config-entries/service-resolver.html](https://www.consul.io/docs/agent/config-entries/service-resolver.html)
+
+In this example you are going to use the `redirect` capability which allows the explicit resolution of a service to a particular datacenter. By default a service will always attempt to resolve to its own datacenter. The `service-resolver` config entry allows you to override that behaviour.
+
+The following example can be found in the file `examples\gateways\l7_config\api_resolver.hcl`.
+
+```ruby
+kind = "service-resolver"
+name = "api"
+
+redirect {
+  service    = "api"
+  datacenter = "cloud"
+}
+```
+
+Configuration entries can be written using with the `consul config write` command.
+
+Write this file to your cluster:
+
+```shell
+consul config write api_resolver.hcl`
+```
+
+When you view the `Web` service in your browser the `API` will now be resolving correctly.
+
+[http://localhost:9090/ui](http://localhost:9090/ui)
+
+![](images/gateways/fake_service_cloud.png)
+
+## Summary
+
+In this section you have learned how to use Consul Gateways to allow traffic to transparently and securely be routed from datacenter to datacenter. In the next example we will put all of this together to see how we can migrate our applications.
+
+Before continuing don't forget to clean up:
+
+```shell
+yard down
+#...
+
+Version: 0.2.4
+
+## Stopping Kubernetes and cleaning resources
+2da15daeb08b
+ad47c5aa6dd0
+INFO[0000] Removing cluster [shipyard]
+INFO[0000] ...Removing server
+INFO[0002] ...Removing docker image volume
+INFO[0002] Removed cluster [shipyard]
+```
+
+```shell
+docker-compose down
+Stopping gateway_consul_1  ... done
+Stopping gateway_api_1     ... done
+```

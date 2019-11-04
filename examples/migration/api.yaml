@@ -16,9 +16,9 @@ spec:
         app: api
       annotations:
         "consul.hashicorp.com/connect-inject": "true"
+        "consul.hashicorp.com/connect-service-protocol": "http"
         "consul.hashicorp.com/service-tags": "v2"
         "consul.hashicorp.com/service-meta-version": "2"
-        "consul.hashicorp.com/connect-service-protocol": "http"
     spec:
       containers:
       - name: api
