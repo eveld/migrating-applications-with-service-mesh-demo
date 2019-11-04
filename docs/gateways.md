@@ -125,7 +125,7 @@ The file `helm-values.yml` file in the folder `examples/gateways` has already be
 yard up --consul-port 18500 \
         --consul-values $PWD/helm-values.yml \
         --network gateways_wan \
-        --network-ip 192.169.7.131
+        --network-ip 192.169.7.100
 
 yard expose --bind-ip none \
         --network gateways_wan \
