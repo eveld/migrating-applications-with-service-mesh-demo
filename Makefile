@@ -1,4 +1,4 @@
-.PHONY: onprem cloud expose nuke tools apps migrate world multi-cloud
+.PHONY: onprem nomad cloud expose nuke tools apps migrate world multi-cloud
 
 PROJECT=yard
 
@@ -9,6 +9,8 @@ ONPREM_PATH="$(PWD)/onprem"
 CLUSTER_PATH="$(ONPREM_PATH)/cluster"
 GATEWAY_PATH="$(ONPREM_PATH)/gateway"
 APPS_PATH="$(ONPREM_PATH)/apps"
+
+NOMAD_PATH="nomad"
 
 MONOLITH_PATH="$(APPS_PATH)/monolith"
 CURRENCY_PATH="$(APPS_PATH)/currency"
@@ -29,7 +31,13 @@ step8: currency-v2 currency-v2-router
 step9: onprem-gateway
 step10: multi-cloud expose-multi-cloud
 step11: multi-cloud-service
-step12: connect-onprem
+step12: multi-cloud-failover
+step13: currency
+step14: multi-cloud-splitting
+step15: connect-onprem
+
+nomad:
+	docker-compose -p $(PROJECT) --project-directory $(NOMAD_PATH) -f $(NOMAD_PATH)/docker-compose.yaml up -d 
 
 #
 # Base environment
@@ -217,7 +225,7 @@ expose-multi-cloud-gateway:
 multi-cloud-service: deploy-multi-cloud-service expose-multi-cloud-service
 deploy-multi-cloud-service:
 	yard exec --name cloud -- kubectl apply -f /work/multi-cloud/api.yaml
-	consul config write multi-cloud/space-resolver.hcl
+	consul config write multi-cloud/central_config/space-resolver.hcl
 	yard exec --name multi-cloud -- kubectl apply -f /work/multi-cloud/backend.yaml
 	sleep 3
 destroy-multi-cloud-service:
@@ -230,13 +238,19 @@ expose-multi-cloud-service:
 	--port 19090:9090
 
 
+multi-cloud-failover:
+	consul config write multi-cloud/central_config/failover.hcl
+
+multi-cloud-splitting:
+	consul config write multi-cloud/central_config/split-resolver.hcl
+	consul config write multi-cloud/central_config/split-splitter.hcl
+
 #
 # Connect the multi-cluster services to onprem
 #
 connect-onprem:
 	yard exec --name multi-cloud -- kubectl apply -f /work/connect/backend.yaml
 	consul config write connect/onprem-resolver.hcl
-
 
 #
 # Blow up everything

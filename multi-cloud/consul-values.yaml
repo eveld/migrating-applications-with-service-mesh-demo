@@ -1,6 +1,10 @@
 global:
   datacenter: space
 
+connectInject:
+  centralConfig:
+    enabled: false
+
 meshGateway:
   enabled: true
   mode: local
